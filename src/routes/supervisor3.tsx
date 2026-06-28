@@ -415,7 +415,7 @@ function SupervisorDashboardV3() {
         {/* ── Hero section — layout adapts based on hasPendingCases ──────────── */}
         {hasPendingCases ? (
           // Active layout: [KPI cards] | [Your Assignment (wide)] | [Help & Resources]
-          <section className="grid grid-cols-1 lg:grid-cols-[340px_1fr_240px] gap-6 items-stretch lg:h-[475px]">
+          <section className="grid grid-cols-1 lg:grid-cols-[340px_1fr_340px] gap-6 items-stretch lg:h-[475px]">
             <div className="grid grid-cols-2 grid-rows-2 gap-3 h-[240px]">
               {stats.map((s, i) => {
                 const ts = toneStyles[s.tone];
@@ -439,7 +439,7 @@ function SupervisorDashboardV3() {
           </section>
         ) : (
           // Caught-up layout: [Your Assignment (wide)] | [Help & Resources]
-          <section className="grid grid-cols-1 lg:grid-cols-[1fr_240px] gap-6 items-stretch lg:h-[475px]">
+          <section className="grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-6 items-stretch lg:h-[475px]">
             {yourAssignment}
             {helpResources}
           </section>
