@@ -26,6 +26,14 @@ import {
   ChevronRight,
   SlidersHorizontal,
   PartyPopper,
+  MapPin,
+  Phone,
+  Calendar,
+  RefreshCcw,
+  Building2,
+  AlertTriangle,
+  User as UserIcon,
+  ShieldCheck,
 } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -35,30 +43,27 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sh
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
-export const Route = createFileRoute("/supervisor3")({
+export const Route = createFileRoute("/supervisor5")({
   head: () => ({
     meta: [
-      { title: "Immidart — Supervisor Dashboard (All caught up)" },
-      { name: "description", content: "Supervisor view when there are no pending actions or cases." },
+      { title: "Immidart — Supervisor Dashboard (Active Assignment)" },
+      { name: "description", content: "Supervisor view when the assignee is actively working in the host country." },
     ],
   }),
   loader: async () => { await new Promise(r => setTimeout(r, 3000)); },
   pendingComponent: () => <AppLoader />,
-  component: SupervisorDashboardV3,
+  component: SupervisorDashboardV5,
 });
 
 // ── Data ────────────────────────────────────────────────────────────────────
-// All pending/action-required counts are 0 to simulate a clear supervisor queue.
-// Change these arrays to populate the view and the layout will adapt automatically.
 
 const stats = [
-  { label: "Pending Approvals",     value: "00", badge: "Nothing to sign off", tone: "green" as const },
-  { label: "Team Members Abroad",   value: "12", badge: "On assignment",        tone: "blue"  as const },
-  { label: "Cases In Progress",     value: "00", badge: "All cases closed",     tone: "green" as const },
-  { label: "Total Team Assignments",value: "148",badge: "All time",             tone: "green" as const },
+  { label: "Pending Approvals",      value: "00", badge: "Nothing to sign off", tone: "green" as const },
+  { label: "Team Members Abroad",    value: "12", badge: "On assignment",        tone: "blue"  as const },
+  { label: "Cases In Progress",      value: "00", badge: "All cases closed",     tone: "green" as const },
+  { label: "Total Team Assignments", value: "148",badge: "All time",             tone: "green" as const },
 ];
 
-// Empty — the whole page adapts when items are added here
 const supervisorTasks: {
   id: string;
   type: "task" | "approval" | "clarification";
@@ -71,16 +76,15 @@ const supervisorTasks: {
   caseId: string;
 }[] = [];
 
-// Team cases — supervisor3 always shows the full history, including completed cases.
 const rows: string[][] = [
-  ["WI231445780",      "Clark Kent",      "Portugal",       "Approved",            "20/Apr/2026"],
-  ["IWA1234567890",    "Diana Prince",    "United States",  "Visa Filed",          "28/May/2026"],
-  ["ATR1234567890",    "Bruce Wayne",     "United Kingdom", "Awaiting Decision",   "01/Jun/2026"],
-  ["WP12103910391031", "Barry Allen",     "Germany",        "Docs Submitted",      "05/Jun/2026"],
-  ["IWA1234567891",    "Hal Jordan",      "Canada",         "Approved",            "10/Mar/2026"],
-  ["WP9876543210",     "Arthur Curry",    "Australia",      "Completed",           "15/Feb/2026"],
-  ["WI231445781",      "Natasha Romanoff","Germany",        "Completed",           "22/Jan/2026"],
-  ["ATR1234567891",    "Peter Parker",    "Canada",         "Approved",            "18/Dec/2025"],
+  ["WI231445780",      "Clark Kent",       "Portugal",       "Approved",          "20/Apr/2026"],
+  ["IWA1234567890",    "Diana Prince",     "United States",  "Visa Filed",        "28/May/2026"],
+  ["ATR1234567890",    "Bruce Wayne",      "United Kingdom", "Awaiting Decision", "01/Jun/2026"],
+  ["WP12103910391031", "Barry Allen",      "Germany",        "Docs Submitted",    "05/Jun/2026"],
+  ["IWA1234567891",    "Hal Jordan",       "Canada",         "Approved",          "10/Mar/2026"],
+  ["WP9876543210",     "Arthur Curry",     "Australia",      "Completed",         "15/Feb/2026"],
+  ["WI231445781",      "Natasha Romanoff", "Germany",        "Completed",         "22/Jan/2026"],
+  ["ATR1234567891",    "Peter Parker",     "Canada",         "Approved",          "18/Dec/2025"],
 ];
 
 const supervisorTodoTabs = [
@@ -90,7 +94,6 @@ const supervisorTodoTabs = [
 ] as const;
 type SupervisorTodoTabKey = (typeof supervisorTodoTabs)[number]["key"];
 
-// 6-button application strip, matching the case manager dashboard pattern
 const appCategories = [
   { label: "Assignments",   Icon: Briefcase, to: "/"            as const },
   { label: "Immigration",   Icon: Globe2,    to: "/immigration" as const },
@@ -100,9 +103,64 @@ const appCategories = [
   { label: "Invite Letter", Icon: Mail,      to: "/"            as const },
 ];
 
-const assignmentSteps = ["Initiated", "Documents", "Filing", "Decision", "Active"];
-const currentAssignmentStep = 1;
-const assignmentProgress = Math.round((currentAssignmentStep / (assignmentSteps.length - 1)) * 100);
+// Assignment is now Active — assignee has arrived and is working in the host country.
+// Assignment: 23 May 2026 → 22 Oct 2026 (152 days total).
+// As of 30 Jun 2026: 38 days elapsed, 114 days remaining, ~25% complete.
+const ASSIGNMENT = {
+  startDate:      "23 May 2026",
+  endDate:        "22 Oct 2026",
+  daysTotal:      152,
+  daysElapsed:    38,
+  daysRemaining:  114,
+  progressPct:    25,
+  permitExpiry:   "22 Oct 2026",
+  permitType:     "H-1B Work Permit",
+  permitNumber:   "WAC-26-123-45678",
+  caseRef:        "WP1039203903",
+  hostCity:       "New York",
+  hostCountry:    "United States",
+  hostCountryCode:"us",
+  hostEntity:     "Immidart Technologies LLC",
+  lastUpdated:    "01 Jun 2026",
+};
+
+const upcomingActions = [
+  {
+    label:  "Quarterly compliance check-in",
+    detail: "Submit your host-country compliance declaration via the portal.",
+    due:    "Today",
+    urgent: true,
+    Icon:   AlertTriangle,
+  },
+  {
+    label:  "US address registration update",
+    detail: "Ensure your current residential address is filed with local HR.",
+    due:    "15 Jul 2026",
+    urgent: false,
+    Icon:   MapPin,
+  },
+  {
+    label:  "ITIN application deadline",
+    detail: "File for Individual Taxpayer Identification Number if not yet done.",
+    due:    "31 Jul 2026",
+    urgent: false,
+    Icon:   Calendar,
+  },
+  {
+    label:  "Work permit renewal window opens",
+    detail: "Extension can be filed 6 months before permit expiry.",
+    due:    "22 Apr 2027",
+    urgent: false,
+    Icon:   ShieldCheck,
+  },
+];
+
+const quickContacts = [
+  { role: "Local HR",            name: "Jennifer Ross",  detail: "+1 (212) 555-0192", Icon: UserIcon  },
+  { role: "Immigration Attorney", name: "Robert Kane",    detail: "+1 (212) 555-0341", Icon: Briefcase },
+  { role: "Emergency Line",       name: "Immidart 24/7", detail: "+1-800-466-3427",    Icon: Phone     },
+  { role: "Housing Support",      name: "Helen Troy",    detail: "+1 (212) 555-0876", Icon: Building2 },
+];
 
 const overlayCases: string[][] = [];
 
@@ -117,6 +175,7 @@ function StatusPill({ status, className }: { status: string; className?: string 
     "Pending for Screening": "bg-emerald-500/10 text-emerald-600",
     "Approved":              "bg-emerald-500/10 text-emerald-600",
     "Completed":             "bg-emerald-500/10 text-emerald-600",
+    "Active":                "bg-emerald-500/10 text-emerald-600",
   };
   return (
     <span className={`inline-flex items-center px-2.5 py-0.5 rounded text-[11px] font-semibold ${map[status] ?? "bg-muted text-muted-foreground"} ${className ?? ""}`}>
@@ -127,23 +186,21 @@ function StatusPill({ status, className }: { status: string; className?: string 
 
 // ── Component ────────────────────────────────────────────────────────────────
 
-function SupervisorDashboardV3() {
-  const [openCaseList,  setOpenCaseList]  = useState<string | null>(null);
-  const [activeTab,     setActiveTab]     = useState<"team" | "approval">("team");
-  const [todoTab,       setTodoTab]       = useState<SupervisorTodoTabKey>("task");
+function SupervisorDashboardV5() {
+  const [openCaseList, setOpenCaseList] = useState<string | null>(null);
+  const [activeTab,    setActiveTab]    = useState<"team" | "approval">("team");
+  const [todoTab,      setTodoTab]      = useState<SupervisorTodoTabKey>("task");
 
-  // Drives the entire layout — populate supervisorTasks to switch to the active (supervisor2-style) layout.
-  // Team Cases (rows) is independent — supervisor3 always shows the full team-case history here.
   const hasPendingCases = supervisorTasks.length > 0;
 
   const toneStyles = {
-    red:   { border: "border-l-brand-red",   badge: "bg-brand-red/10 text-brand-red",    icon: <AlertCircle  className="w-3 h-3" /> },
-    amber: { border: "border-l-brand-amber", badge: "bg-brand-amber/10 text-brand-amber", icon: <Clock        className="w-3 h-3" /> },
-    blue:  { border: "border-l-brand-blue",  badge: "bg-brand-blue/10 text-brand-blue",   icon: <Briefcase    className="w-3 h-3" /> },
-    green: { border: "border-l-emerald-500", badge: "bg-emerald-500/10 text-emerald-600", icon: <CheckCircle2 className="w-3 h-3" /> },
+    red:   { border: "border-l-brand-red",   badge: "bg-brand-red/10 text-brand-red",     icon: <AlertCircle  className="w-3 h-3" /> },
+    amber: { border: "border-l-brand-amber", badge: "bg-brand-amber/10 text-brand-amber",  icon: <Clock        className="w-3 h-3" /> },
+    blue:  { border: "border-l-brand-blue",  badge: "bg-brand-blue/10 text-brand-blue",    icon: <Briefcase    className="w-3 h-3" /> },
+    green: { border: "border-l-emerald-500", badge: "bg-emerald-500/10 text-emerald-600",  icon: <CheckCircle2 className="w-3 h-3" /> },
   };
 
-  // ── Shared sub-sections ────────────────────────────────────────────────────
+  // ── Help & Resources ───────────────────────────────────────────────────────
 
   const helpResources = (
     <div className="bg-white rounded-lg p-4 shadow-sm border border-border flex flex-col">
@@ -169,6 +226,8 @@ function SupervisorDashboardV3() {
       </div>
     </div>
   );
+
+  // ── Things to do ──────────────────────────────────────────────────────────
 
   const thingsToDo = (
     <div className="bg-white rounded-lg p-5 shadow-sm border border-border flex flex-col h-full">
@@ -252,7 +311,6 @@ function SupervisorDashboardV3() {
           })}
         </Tabs>
       ) : (
-        // Empty state — "You're all caught up!"
         <div className="flex-1 flex flex-col items-center justify-center gap-4 py-8 text-center">
           <div className="w-14 h-14 rounded-full bg-emerald-50 grid place-items-center">
             <PartyPopper className="w-7 h-7 text-emerald-500" />
@@ -266,59 +324,66 @@ function SupervisorDashboardV3() {
     </div>
   );
 
+  // ── Your Assignment — Active in host country ───────────────────────────────
+
   const yourAssignment = (
     <div className="bg-white rounded-lg p-5 shadow-sm border border-border flex flex-col h-full overflow-hidden">
+
       {/* Card header */}
-      <div className="flex items-center gap-2 mb-4 shrink-0">
+      <div className="flex items-center justify-between mb-4 shrink-0">
         <h2 className="text-base font-bold text-brand-navy flex items-center gap-2">
           <Briefcase className="w-4 h-4" />
           Your Immigration Request
         </h2>
+        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-700 text-[11px] font-semibold">
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shrink-0" />
+          Active in Host Country
+        </span>
       </div>
 
-      {/* Two-column body: left = progress + fields + buttons · right = notification */}
+      {/* Two-column body */}
       <div className="flex-1 flex gap-4 min-h-0">
 
-        {/* Left column */}
+        {/* ── Left column ── */}
         <div className="w-[432px] shrink-0 flex flex-col">
-          {/* Flag progress bar */}
+
+          {/* Location + duration progress */}
           <div className="bg-brand-canvas rounded-lg px-4 py-3 mb-4 shrink-0">
-            <div className="flex items-center gap-3">
-              <div className="flex flex-col items-center shrink-0">
-                <FlagIcon code="in" className="text-2xl" />
-                <span className="text-[11px] font-semibold text-brand-navy mt-0.5">IND</span>
-              </div>
-              <div className="flex-1 flex flex-col gap-1.5">
-                <div className="relative pt-4">
-                  <div className="absolute top-0 -translate-x-1/2 transition-all duration-700" style={{ left: `${assignmentProgress}%` }}>
-                    <Plane className="w-3.5 h-3.5 text-brand-blue rotate-45" />
-                  </div>
-                  <div className="relative h-2 bg-border/70 rounded-full overflow-hidden">
-                    <div
-                      className="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-brand-blue via-brand-sky to-brand-blue/60 transition-all duration-700"
-                      style={{ width: `${assignmentProgress}%` }}
-                    />
-                  </div>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-[10px] text-muted-foreground">{assignmentSteps[currentAssignmentStep]}</span>
-                  <span className="text-[10px] font-semibold text-brand-blue">{assignmentProgress}% complete</span>
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2.5">
+                <FlagIcon code={ASSIGNMENT.hostCountryCode} className="text-2xl" />
+                <div>
+                  <p className="text-sm font-bold text-brand-navy leading-tight">{ASSIGNMENT.hostCity}, {ASSIGNMENT.hostCountry}</p>
+                  <p className="text-[10px] text-muted-foreground flex items-center gap-1 mt-0.5">
+                    <MapPin className="w-3 h-3" /> Currently working here
+                  </p>
                 </div>
               </div>
-              <div className="flex flex-col items-center shrink-0">
-                <FlagIcon code="us" className="text-2xl" />
-                <span className="text-[11px] font-semibold text-brand-navy mt-0.5">US</span>
+              <div className="text-right shrink-0">
+                <p className="text-2xl font-bold text-brand-navy leading-none">{ASSIGNMENT.daysRemaining}</p>
+                <p className="text-[10px] text-muted-foreground">days remaining</p>
               </div>
+            </div>
+            <div className="h-2 bg-border/70 rounded-full overflow-hidden">
+              <div
+                className="h-full rounded-full bg-gradient-to-r from-emerald-500 to-brand-blue transition-all duration-700"
+                style={{ width: `${ASSIGNMENT.progressPct}%` }}
+              />
+            </div>
+            <div className="flex justify-between mt-1.5">
+              <span className="text-[10px] text-muted-foreground">{ASSIGNMENT.startDate}</span>
+              <span className="text-[10px] font-semibold text-emerald-600">{ASSIGNMENT.progressPct}% complete</span>
+              <span className="text-[10px] text-muted-foreground">{ASSIGNMENT.endDate}</span>
             </div>
           </div>
 
           {/* Meta details */}
           <div className="grid grid-cols-2 gap-2 mb-4 shrink-0">
             {[
-              { label: "Type",       value: "Permanent Transfer" },
-              { label: "Start date", value: "29 May 2026"        },
-              { label: "Visa type",  value: "Work Permit"        },
-              { label: "Case ref.",  value: "WP1039203903"       },
+              { label: "Permit type",    value: ASSIGNMENT.permitType      },
+              { label: "Permit expires", value: ASSIGNMENT.permitExpiry    },
+              { label: "Permit number",  value: ASSIGNMENT.permitNumber    },
+              { label: "Host entity",    value: "Immidart Technologies"    },
             ].map(({ label, value }) => (
               <div key={label} className="bg-accent/40 rounded-md px-2 py-1.5">
                 <p className="text-[9px] text-muted-foreground uppercase tracking-wide mb-0.5">{label}</p>
@@ -329,97 +394,82 @@ function SupervisorDashboardV3() {
 
           {/* Status + action buttons */}
           <div className="mt-auto shrink-0">
-            <div className="mb-2">
-              <StatusPill status="Pending for Screening" className="w-full justify-center py-3.5 text-[15px]" />
+            <div className="mb-2 flex items-center justify-center rounded px-2.5 py-3.5 bg-emerald-500/10 text-emerald-700 text-[15px] font-semibold">
+              Active
             </div>
             <div className="flex flex-col gap-2">
-              <Link to="/immigration" className="flex items-center justify-center gap-2 bg-transparent border border-brand-blue text-brand-blue rounded-lg px-4 py-2.5 text-sm font-semibold hover:bg-brand-blue/5 transition-colors">
-                <Globe2 className="w-4 h-4" />
-                View Immigration Request
+              <Link
+                to="/immigration"
+                className="flex items-center justify-center gap-2 bg-transparent border border-brand-blue text-brand-blue rounded-lg px-4 py-2.5 text-sm font-semibold hover:bg-brand-blue/5 transition-colors"
+              >
+                <ShieldCheck className="w-4 h-4" />
+                View Work Permit
               </Link>
-              <Link to="/assignment-request" className="flex items-center justify-center gap-2 bg-white border border-brand-navy text-brand-navy rounded-lg px-4 py-2.5 text-sm font-semibold hover:bg-brand-navy hover:text-white transition-colors">
-                <Briefcase className="w-4 h-4" />
-                View Assignment Request
-              </Link>
+              <button
+                type="button"
+                className="flex items-center justify-center gap-2 bg-white border border-brand-amber text-brand-amber rounded-lg px-4 py-2.5 text-sm font-semibold hover:bg-brand-amber/5 transition-colors"
+              >
+                <RefreshCcw className="w-4 h-4" />
+                Request Extension
+              </button>
             </div>
           </div>
 
           {/* Footer */}
           <div className="mt-3 pt-3 border-t border-border shrink-0">
-            <span className="text-[11px] text-muted-foreground">Last updated: 15/May/2026</span>
+            <span className="text-[11px] text-muted-foreground">Last updated: {ASSIGNMENT.lastUpdated}</span>
           </div>
         </div>
 
-        {/* Right column — notification + milestones */}
-        <div className="flex-1 min-w-0 flex flex-col gap-2">
+        {/* ── Right column ── */}
+        <div className="flex-1 min-w-0 flex flex-col gap-3 overflow-y-auto">
 
-          {/* Latest update — condensed */}
-          <div className="rounded-lg border border-border bg-accent/30 px-4 py-2.5 shrink-0">
-            <div className="flex gap-2.5 items-start">
-              <span className="mt-1 block w-2 h-2 rounded-full bg-brand-blue shrink-0" />
-              <div className="flex-1 min-w-0">
-                <p className="text-[10px] text-muted-foreground uppercase tracking-wide font-semibold mb-0.5">Latest update</p>
-                <p className="text-[12px] font-semibold text-brand-navy leading-snug">Work Permit Filing — Documents Submitted</p>
-              </div>
-            </div>
-            <div className="mt-1.5 pl-4">
-              <Link to="/immigration" className="text-[11px] font-semibold text-brand-blue hover:underline">
-                Open request to read more →
-              </Link>
+          {/* Upcoming actions */}
+          <div className="shrink-0">
+            <p className="text-[10px] text-muted-foreground uppercase tracking-wide font-semibold mb-2">Upcoming actions</p>
+            <div className="space-y-1.5">
+              {upcomingActions.map((a) => (
+                <div
+                  key={a.label}
+                  className={`rounded-lg border px-3 py-2.5 flex items-start gap-2.5 ${
+                    a.urgent ? "border-brand-red/30 bg-brand-red/5" : "border-border bg-accent/20"
+                  }`}
+                >
+                  <a.Icon className={`w-3.5 h-3.5 shrink-0 mt-0.5 ${a.urgent ? "text-brand-red" : "text-brand-blue"}`} />
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-baseline justify-between gap-2">
+                      <p className="text-[12px] font-semibold text-brand-navy leading-snug truncate">{a.label}</p>
+                      <span className={`text-[10px] font-semibold shrink-0 ${a.urgent ? "text-brand-red" : "text-muted-foreground"}`}>{a.due}</span>
+                    </div>
+                    <p className="text-[10px] text-muted-foreground mt-0.5 leading-snug">{a.detail}</p>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
 
-          {/* Request progress — combined vertical timeline card */}
-          <div className="flex-1 min-h-0 flex flex-col gap-2">
-            <p className="text-[10px] text-muted-foreground uppercase tracking-wide font-semibold shrink-0">Request progress</p>
-            <div className="flex-1 rounded-lg border border-border bg-white shadow-sm px-4 py-4 flex flex-col justify-between">
-              {/* Milestone 1 — completed */}
-              <div className="flex gap-3">
-                <div className="flex flex-col items-center shrink-0">
-                  <div className="w-9 h-9 rounded-full bg-emerald-500 flex flex-col items-center justify-center text-white text-center shrink-0">
-                    <span className="text-[7px] font-bold leading-tight">May 17,</span>
-                    <span className="text-[7px] font-bold leading-tight">2026</span>
+          {/* Quick contacts */}
+          <div className="shrink-0">
+            <p className="text-[10px] text-muted-foreground uppercase tracking-wide font-semibold mb-2">Quick contacts</p>
+            <div className="grid grid-cols-2 gap-1.5">
+              {quickContacts.map(({ role, name, detail, Icon }) => (
+                <button
+                  key={role}
+                  type="button"
+                  className="rounded-lg border border-border bg-white px-3 py-2.5 text-left hover:border-brand-blue/30 hover:bg-brand-sky/5 transition-colors group"
+                >
+                  <div className="flex items-center gap-1.5 mb-1">
+                    <Icon className="w-3 h-3 text-brand-blue group-hover:text-brand-blue shrink-0" />
+                    <p className="text-[10px] text-muted-foreground leading-none">{role}</p>
                   </div>
-                  {/* Connector bar */}
-                  <div className="w-0.5 flex-1 my-1.5 bg-emerald-200 rounded-full" />
-                </div>
-                <div className="flex-1 min-w-0 pb-3">
-                  <div className="flex items-start justify-between gap-2">
-                    <p className="text-[12px] font-semibold text-brand-navy leading-snug">LOA signed by Authorized Signatory</p>
-                    <span className="text-[9px] text-muted-foreground shrink-0 mt-0.5">15/May/2026</span>
-                  </div>
-                  <p className="text-[11px] text-muted-foreground mt-1 leading-relaxed">The letter of assignment has been reviewed and countersigned. All required authorizations are in place to proceed.</p>
-                  <span className="mt-1.5 inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-600">
-                    <CheckCircle2 className="w-3 h-3" /> Completed
-                  </span>
-                </div>
-              </div>
-
-              {/* Milestone 2 — current / in-progress */}
-              <div className="flex gap-3">
-                <div className="flex flex-col items-center shrink-0">
-                  <div className="w-9 h-9 rounded-full bg-brand-blue/10 border-2 border-brand-blue flex flex-col items-center justify-center text-brand-blue text-center shrink-0">
-                    <span className="text-[7px] font-bold leading-tight">Jun 19,</span>
-                    <span className="text-[7px] font-bold leading-tight">2026</span>
-                  </div>
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-start justify-between gap-2">
-                    <p className="text-[12px] font-semibold text-brand-navy leading-snug">Filing with Immigration Authorities</p>
-                    <span className="text-[9px] text-muted-foreground shrink-0 mt-0.5">Est. 19/Jun/2026</span>
-                  </div>
-                  <p className="text-[11px] text-muted-foreground mt-1 leading-relaxed">The work permit application is being submitted to the relevant immigration authority for formal review.</p>
-                  <p className="text-[11px] text-muted-foreground leading-relaxed">Processing typically takes 4–6 weeks; you will be notified once a decision is received.</p>
-                  <span className="mt-1.5 inline-flex items-center gap-1 text-[10px] font-semibold text-brand-blue">
-                    <Clock className="w-3 h-3" /> In progress
-                  </span>
-                </div>
-              </div>
+                  <p className="text-[12px] font-semibold text-brand-navy leading-snug">{name}</p>
+                  <p className="text-[10px] text-brand-blue mt-0.5">{detail}</p>
+                </button>
+              ))}
             </div>
           </div>
 
         </div>
-
       </div>
     </div>
   );
@@ -430,12 +480,10 @@ function SupervisorDashboardV3() {
 
       <main className="max-w-[1400px] mx-auto px-8 py-8 space-y-8">
 
-        {/* Overdue reportee card — only shown when there are pending cases */}
         {hasPendingCases && <MyAssignmentCard />}
 
-        {/* ── Hero section — layout adapts based on hasPendingCases ──────────── */}
+        {/* ── Hero section ──────────────────────────────────────────────────── */}
         {hasPendingCases ? (
-          // Active layout: [KPI cards] | [Your Assignment (wide)] | [Help & Resources]
           <section className="grid grid-cols-1 lg:grid-cols-[340px_1fr_340px] gap-6 items-stretch lg:h-[475px]">
             <div className="grid grid-cols-2 grid-rows-2 gap-3 h-[240px]">
               {stats.map((s, i) => {
@@ -459,14 +507,13 @@ function SupervisorDashboardV3() {
             {helpResources}
           </section>
         ) : (
-          // Caught-up layout: [Your Assignment (wide)] | [Help & Resources]
           <section className="grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-6 items-stretch lg:h-[475px]">
             {yourAssignment}
             {helpResources}
           </section>
         )}
 
-        {/* Applications — full-width 6-button row, matches the case manager dashboard */}
+        {/* Applications */}
         <section>
           <h2 className="text-base font-bold text-brand-navy mb-3 flex items-center gap-2">
             <LayoutGrid className="w-4 h-4" />
@@ -490,7 +537,6 @@ function SupervisorDashboardV3() {
         <section className="bg-white rounded-lg p-6 shadow-sm">
           <div className="flex items-center justify-between gap-3 mb-4">
             <h2 className="text-base font-bold text-brand-navy">Team Cases</h2>
-    
           </div>
 
           <div className="border-b border-border flex items-center gap-0 mb-5">
@@ -582,10 +628,10 @@ function SupervisorDashboardV3() {
         </section>
       </main>
 
-      {/* Stat card overlay sheet */}
+      {/* Stat card overlay */}
       <Sheet open={openCaseList !== null} onOpenChange={(o) => !o && setOpenCaseList(null)}>
         <SheetContent side="right" className="w-full sm:max-w-2xl p-0 flex flex-col">
-          <SheetHeader className="p-6 border-b border-border">
+          <SheetHeader className="p-6 pr-12 border-b border-border">
             <SheetTitle className="text-brand-navy">{openCaseList}</SheetTitle>
           </SheetHeader>
           <div className="p-6 space-y-4 overflow-y-auto">

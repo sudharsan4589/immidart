@@ -1,18 +1,66 @@
 import { useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
-import { Search, Bell, Sparkles } from "lucide-react";
+import { Search, Bell, Sparkles, AlertCircle, Clock, CheckCircle2, FileText } from "lucide-react";
 import { UserMenu } from "@/components/UserMenu";
 import { ActionCentreButton } from "@/components/ActionCentreButton";
 import { CreateRequestButton } from "@/components/CreateRequestButton";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 
+const alerts = [
+  {
+    id: "a1",
+    type: "urgent" as const,
+    icon: AlertCircle,
+    iconColor: "text-brand-red",
+    iconBg: "bg-brand-red/10",
+    title: "Documents required for Work Permit",
+    body: "2 documents are missing from your WP filing. Upload them before 21 May 2026 to avoid delays.",
+    time: "2 hours ago",
+    caseId: "WP1039203903",
+  },
+  {
+    id: "a2",
+    type: "info" as const,
+    icon: Clock,
+    iconColor: "text-brand-amber",
+    iconBg: "bg-brand-amber/10",
+    title: "Visa decision pending",
+    body: "Your US Work Permit application is under review by the immigration authority. Expected decision by 19 Jun 2026.",
+    time: "Yesterday",
+    caseId: "WP1039203903",
+  },
+  {
+    id: "a3",
+    type: "success" as const,
+    icon: CheckCircle2,
+    iconColor: "text-emerald-600",
+    iconBg: "bg-emerald-500/10",
+    title: "LOA signed by Authorized Signatory",
+    body: "Your Letter of Assignment has been countersigned. All authorizations are in place to proceed with filing.",
+    time: "15 May 2026",
+    caseId: "WP1039203903",
+  },
+  {
+    id: "a4",
+    type: "info" as const,
+    icon: FileText,
+    iconColor: "text-brand-blue",
+    iconBg: "bg-brand-blue/10",
+    title: "Travel authorization submitted",
+    body: "Your UK business travel request (ATR5556667777) has been submitted for manager approval.",
+    time: "22 Apr 2026",
+    caseId: "ATR5556667777",
+  },
+];
+
 interface PageHeaderProps {
   name?: string;
   role?: string;
   compact?: boolean;
+  hideCreateRequest?: boolean;
 }
 
-export function PageHeader({ name = "Clark Kent", role = "Case Manager", compact }: PageHeaderProps) {
+export function PageHeader({ name = "Clark Kent", role = "Case Manager", compact, hideCreateRequest }: PageHeaderProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [alertsOpen, setAlertsOpen] = useState(false);
   const navigate = useNavigate();
@@ -45,7 +93,7 @@ export function PageHeader({ name = "Clark Kent", role = "Case Manager", compact
               </button>
             </form>
             <ActionCentreButton />
-            <CreateRequestButton />
+            {!hideCreateRequest && <CreateRequestButton />}
             <button
               type="button"
               onClick={() => setAlertsOpen(true)}
@@ -68,7 +116,32 @@ export function PageHeader({ name = "Clark Kent", role = "Case Manager", compact
             </SheetTitle>
           </SheetHeader>
           <ul className="flex-1 overflow-y-auto divide-y divide-border">
-            <li className="p-8 text-center text-sm text-muted-foreground">No alerts right now.</li>
+            {alerts.map((alert) => (
+              <li key={alert.id} className="p-4 flex flex-col gap-2 hover:bg-accent/30 transition-colors">
+                <div className="flex gap-3">
+                  <div className={`w-8 h-8 rounded-full shrink-0 flex items-center justify-center ${alert.iconBg}`}>
+                    <alert.icon className={`w-4 h-4 ${alert.iconColor}`} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-start justify-between gap-2">
+                      <p className="text-sm font-semibold text-brand-navy leading-snug">{alert.title}</p>
+                      <span className="text-[10px] text-muted-foreground shrink-0 mt-0.5">{alert.time}</span>
+                    </div>
+                    <p className="text-[12px] text-muted-foreground mt-1 leading-relaxed">{alert.body}</p>
+                  </div>
+                </div>
+                <div className="pl-11">
+                  <Link
+                    to="/case/$caseId"
+                    params={{ caseId: alert.caseId }}
+                    onClick={() => setAlertsOpen(false)}
+                    className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-brand-blue border border-brand-blue/40 rounded px-3 py-1 hover:bg-brand-blue hover:text-white transition-colors"
+                  >
+                    View request →
+                  </Link>
+                </div>
+              </li>
+            ))}
           </ul>
         </SheetContent>
       </Sheet>

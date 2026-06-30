@@ -3,40 +3,37 @@ import { AskImmibroButton } from "@/components/AskImmibroButton";
 import { UserMenu } from "@/components/UserMenu";
 import { ActionCentreButton } from "@/components/ActionCentreButton";
 import { CreateRequestButton } from "@/components/CreateRequestButton";
-import { ReportsButton } from "@/components/ReportsButton";
-import { ApplicationBadge } from "@/components/ApplicationBadge";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import {
   Search,
   Sparkles,
-  User,
   ChevronRight,
   ChevronLeft,
   ChevronUp,
+  ChevronDown,
   AlertCircle,
   Clock,
   ArrowDown,
-  CalendarRange,
   LayoutGrid,
   SlidersHorizontal,
   Globe2,
   BookOpen,
   HelpCircle,
-  ChevronDown,
   Briefcase,
   Plane,
   FileCheck,
   Scale,
   Mail,
   ListChecks,
-  LogOut,
   Bell,
   Wrench,
   FileText,
   XCircle,
   UserCog,
   Settings,
+  CheckCircle2,
+  PartyPopper,
 } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -47,76 +44,59 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { RequireAuth } from "@/components/RequireAuth";
 import { clearAuth } from "@/lib/auth";
 
-const overlayCases = [
-  ["WI231445780", "Portugal", "Pending for Screening", "20/May/2026"],
-  ["WI231445781", "Germany", "Docs Submitted", "22/May/2026"],
-  ["IWA1234567890", "United States", "Visa Filed", "28/May/2026"],
-  ["ATR1234567890", "United Kingdom", "Awaiting Decision", "01/Jun/2026"],
-  ["IWA1234567891", "Canada", "Pending for Screening", "10/Jun/2026"],
-  ["WP9876543210", "Australia", "Approved", "15/Jun/2026"],
-];
-
-export const Route = createFileRoute("/")({
+export const Route = createFileRoute("/index2")({
   head: () => ({
     meta: [
-      { title: "Immidart — Case Management Dashboard" },
-      {
-        name: "description",
-        content:
-          "Track immigration cases, SLA performance, priority actions and assignments in one place.",
-      },
-      { property: "og:title", content: "Immidart Dashboard" },
-      {
-        property: "og:description",
-        content: "Case management dashboard for immigration assignments.",
-      },
+      { title: "Immidart — Case Management Dashboard (All clear)" },
+      { name: "description", content: "Case manager view with no pending actions." },
     ],
   }),
   loader: async () => { await new Promise(r => setTimeout(r, 3000)); },
   pendingComponent: () => <AppLoader />,
   component: () => (
     <RequireAuth>
-      <Dashboard />
+      <Dashboard2 />
     </RequireAuth>
   ),
 });
 
-// 3×2 grid — status alerts on top row, pending volume by application on bottom row
+// New card first: "Total cases you've taken action" = 50
+// All pending/action counts are 0. "SLA breaching this week" replaced by the new card.
 const stats = [
   {
+    label: "Total cases you've taken action",
+    value: "50",
+    badge: "Cases actioned",
+    tone: "green" as const,
+  },
+  {
     label: "Overdue actions",
-    value: "04",
-    badge: "Needs attention",
+    value: "00",
+    badge: "All clear",
     tone: "red" as const,
   },
   {
-    label: "SLA breaching this week",
-    value: "09",
-    badge: "Due soon",
-    tone: "amber" as const,
-  },
-  {
     label: "Cases approved this week",
-    value: "07",
-    badge: "Closed out",
+    value: "00",
+    badge: "Nothing yet",
     tone: "green" as const,
   },
   {
     label: "Total Immigration cases pending with you",
-    value: "09",
-    badge: "In progress",
+    value: "00",
+    badge: "All clear",
     tone: "blue" as const,
   },
   {
     label: "Total Assignment cases pending with you",
-    value: "12",
-    badge: "In progress",
+    value: "00",
+    badge: "All clear",
     tone: "blue" as const,
   },
   {
     label: "Total Travel cases pending with you",
-    value: "06",
-    badge: "In progress",
+    value: "00",
+    badge: "All clear",
     tone: "blue" as const,
   },
 ];
@@ -130,70 +110,16 @@ const categories = [
   { label: "Invite Letter", Icon: Mail },
 ];
 
-// Things to do — the case manager's own action items: screening new cases, generating
-// assignment paperwork, and clearing approvals/documents across the cases they own.
-const caseManagerTasks = [
-  {
-    id: "ct1",
-    type: "task" as const,
-    app: "Immigration" as const,
-    label: "Marcus Ellison · US Work Permit",
-    title: "Complete initial screening",
-    status: "Pending for Questionnaire",
-    description: "Marcus Ellison's Work Permit case is waiting on your initial screening before documentation can begin.",
-    dueDate: "20 Jun 2026",
-    urgent: true,
-    actionLabel: "Start screening",
-    caseId: "IWA1234567890",
-  },
-  {
-    id: "ct2",
-    type: "task" as const,
-    app: "Assignments" as const,
-    label: "Clark Kent · Letter of Assignment",
-    title: "Generate Letter of Assignment",
-    status: "Pending for Document Submission",
-    description: "Clark Kent's relocation is ready — generate the Letter of Assignment and route it for signature.",
-    dueDate: "22 Jun 2026",
-    urgent: true,
-    actionLabel: "Generate letter",
-    caseId: "WP12103910391031",
-  },
-  {
-    id: "ct3",
-    type: "approval" as const,
-    app: "Travel" as const,
-    label: "Yuki Tanaka · UK Relocation",
-    title: "Verify submitted travel documents",
-    status: "Pending for Document Submission",
-    description: "Yuki Tanaka has submitted travel documents — review them before the case can move to visa filing.",
-    dueDate: "25 Jun 2026",
-    urgent: false,
-    actionLabel: "Review documents",
-    caseId: "ATR1234567890",
-  },
-  {
-    id: "ct4",
-    type: "clarification" as const,
-    app: "Immigration" as const,
-    label: "Priya Nair · Canada Work Permit",
-    title: "Clarify employer details on filing",
-    status: "Pending for Questionnaire",
-    description: "Government reviewer flagged an employer-info discrepancy on Priya Nair's filing — clarify before resubmitting.",
-    dueDate: "27 Jun 2026",
-    urgent: true,
-    actionLabel: "Respond",
-    caseId: "WP1234567890",
-  },
-];
-
+// All actioned cases — shown in the "All Cases" section below
 const rows = [
-  ["WI231445780",  "Cristiana Lima Bonaldo", "Portugal",       "Overdue",           "20/May/2026",   true],
-  ["IWA1234567890","Marcus Ellison",         "United States",  "Pending Screening", "28/May/2026",   false],
-  ["ATR1234567890","Yuki Tanaka",            "United Kingdom", "Docs Submitted",    "01/Jun/2026",   false],
-  ["IWA1234567891","Priya Nair",             "Canada",         "Visa Filed",        "10/Jun/2026",   false],
-  ["WP9876543210", "Andre Müller",           "Australia",      "Approved",          "15/Jun/2026",   false],
-  ["IWA1234567892","Diana Prince",           "Germany",        "Pending Screening", "20/Jun/2026",   false],
+  ["WI231445780",       "Cristiana Lima Bonaldo", "Portugal",       "Approved",          "20/May/2026",  false],
+  ["IWA1234567890",     "Marcus Ellison",         "United States",  "Approved",          "28/May/2026",  false],
+  ["ATR1234567890",     "Yuki Tanaka",            "United Kingdom", "Completed",         "01/Jun/2026",  false],
+  ["IWA1234567891",     "Priya Nair",             "Canada",         "Approved",          "10/Jun/2026",  false],
+  ["WP9876543210",      "Andre Müller",           "Australia",      "Approved",          "15/Jun/2026",  false],
+  ["IWA1234567892",     "Diana Prince",           "Germany",        "Completed",         "20/Jun/2026",  false],
+  ["WP12103910391031",  "Clark Kent",             "Portugal",       "Approved",          "22/Jun/2026",  false],
+  ["ATR9988776655",     "Barry Allen",            "Japan",          "Completed",         "25/Jun/2026",  false],
 ];
 
 function StatusPill({ status }: { status: string }) {
@@ -203,6 +129,7 @@ function StatusPill({ status }: { status: string }) {
     "Docs Submitted":   "bg-emerald-500/10 text-emerald-600",
     "Visa Filed":       "bg-brand-blue/10 text-brand-blue",
     "Approved":         "bg-emerald-500/10 text-emerald-600",
+    "Completed":        "bg-emerald-500/10 text-emerald-600",
   };
   return (
     <span className={`inline-flex items-center px-2.5 py-0.5 rounded text-[11px] font-semibold ${map[status] ?? "bg-muted text-muted-foreground"}`}>
@@ -211,30 +138,28 @@ function StatusPill({ status }: { status: string }) {
   );
 }
 
-function Dashboard() {
-
-  const [alertsOpen, setAlertsOpen] = useState(false);
-  const [openCaseList, setOpenCaseList] = useState<string | null>(null);
-  const overlayableLabels = new Set([
-    "Overdue actions",
-    "SLA breaching this week",
-    "Awaiting visa decision",
-  ]);
-
+function Dashboard2() {
+  const [alertsOpen, setAlertsOpen]   = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeCasesTab, setActiveCasesTab] = useState<"all" | "ongoing" | "sla" | "approval">("all");
-  const [sortCol, setSortCol] = useState<number | null>(null);
-  const [sortAsc, setSortAsc] = useState(true);
+  const [sortCol, setSortCol]         = useState<number | null>(null);
+  const [sortAsc, setSortAsc]         = useState(true);
+  const allCasesRef                   = useRef<HTMLElement>(null);
+  const navigate                      = useNavigate();
+
   const handleSort = (col: number) => {
     if (sortCol === col) setSortAsc((a) => !a);
     else { setSortCol(col); setSortAsc(true); }
   };
+
   const sortedRows = sortCol === null ? rows : [...rows].sort((a, b) => {
     const av = String(a[sortCol]), bv = String(b[sortCol]);
     return sortAsc ? av.localeCompare(bv) : bv.localeCompare(av);
   });
-  const navigate = useNavigate();
 
+  const scrollToAllCases = () => {
+    allCasesRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
 
   return (
     <div className="min-h-screen bg-brand-canvas">
@@ -277,31 +202,19 @@ function Dashboard() {
                 </button>
               </PopoverTrigger>
               <PopoverContent align="start" className="w-72 p-1">
-                <Link
-                  to="/reports"
-                  className="flex items-center gap-2.5 w-full rounded-md px-3 py-2 text-sm text-foreground hover:bg-accent transition-colors"
-                >
+                <Link to="/reports" className="flex items-center gap-2.5 w-full rounded-md px-3 py-2 text-sm text-foreground hover:bg-accent transition-colors">
                   <FileText className="w-4 h-4 text-brand-blue shrink-0" />
                   Reports
                 </Link>
-                <button
-                  type="button"
-                  className="flex items-center gap-2.5 w-full rounded-md px-3 py-2 text-sm text-foreground hover:bg-accent transition-colors"
-                >
+                <button type="button" className="flex items-center gap-2.5 w-full rounded-md px-3 py-2 text-sm text-foreground hover:bg-accent transition-colors">
                   <XCircle className="w-4 h-4 text-brand-blue shrink-0" />
                   Request Cancellation
                 </button>
-                <button
-                  type="button"
-                  className="flex items-center gap-2.5 w-full rounded-md px-3 py-2 text-sm text-foreground hover:bg-accent transition-colors"
-                >
+                <button type="button" className="flex items-center gap-2.5 w-full rounded-md px-3 py-2 text-sm text-foreground hover:bg-accent transition-colors">
                   <UserCog className="w-4 h-4 text-brand-blue shrink-0" />
                   Change Supervisor / Host Manager
                 </button>
-                <button
-                  type="button"
-                  className="flex items-center gap-2.5 w-full rounded-md px-3 py-2 text-sm text-foreground hover:bg-accent transition-colors"
-                >
+                <button type="button" className="flex items-center gap-2.5 w-full rounded-md px-3 py-2 text-sm text-foreground hover:bg-accent transition-colors">
                   <Settings className="w-4 h-4 text-brand-blue shrink-0" />
                   Configurations
                 </button>
@@ -321,88 +234,79 @@ function Dashboard() {
       </header>
 
       <main className="max-w-[1400px] mx-auto px-8 py-8 space-y-8">
-        {/* Hero — KPI cards (3×2 grid, supervisor-page dimensions) on the left, Things to do on the right — both columns matched height */}
+
+        {/* Hero — KPI cards + Things to do */}
         <section className="grid grid-cols-1 lg:grid-cols-[680px_1fr] gap-4 items-stretch lg:h-[475px]">
-          {/* KPI stat cards — same card dimensions as the supervisor pages, stretched to match Things to do's height */}
-          <div className="grid grid-cols-3 grid-rows-2 gap-3 h-full">
+
+          {/* KPI stat cards */}
+          <div className="grid grid-cols-3 grid-rows-2 gap-3 h-[475px]">
             {stats.map((s) => {
               const toneStyles = {
                 red:   { border: "border-l-brand-red",   badge: "bg-brand-red/10 text-brand-red",    icon: <AlertCircle className="w-3 h-3" /> },
                 amber: { border: "border-l-brand-amber", badge: "bg-brand-amber/10 text-brand-amber", icon: <Clock className="w-3 h-3" /> },
                 blue:  { border: "border-l-brand-blue",  badge: "bg-brand-blue/10 text-brand-blue",   icon: <Briefcase className="w-3 h-3" /> },
-                green: { border: "border-l-emerald-500", badge: "bg-emerald-500/10 text-emerald-600", icon: <ChevronRight className="w-3 h-3" /> },
+                green: { border: "border-l-emerald-500", badge: "bg-emerald-500/10 text-emerald-600", icon: <CheckCircle2 className="w-3 h-3" /> },
               }[s.tone];
-              const isOverlay = overlayableLabels.has(s.label);
-              const base = `bg-white border border-border border-l-4 ${toneStyles.border} rounded-lg p-4 shadow-sm text-left flex flex-col justify-between gap-2`;
-              const inner = (
-                <>
+              return (
+                <div
+                  key={s.label}
+                  className={`bg-white border border-border border-l-4 ${toneStyles.border} rounded-lg p-4 shadow-sm flex flex-col justify-between gap-2`}
+                >
                   <p className="text-xs text-muted-foreground leading-snug">{s.label}</p>
                   <span className="text-[38px] font-bold text-brand-navy leading-none">{s.value}</span>
                   <span className={`inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-1 rounded w-fit ${toneStyles.badge}`}>
                     {toneStyles.icon}{s.badge}
                   </span>
-                </>
+                </div>
               );
-              if (isOverlay) {
-                return (
-                  <button
-                    key={s.label}
-                    type="button"
-                    onClick={() => setOpenCaseList(s.label)}
-                    className={`${base} hover:shadow-md transition-all cursor-pointer`}
-                  >
-                    {inner}
-                  </button>
-                );
-              }
-              return <div key={s.label} className={base}>{inner}</div>;
             })}
           </div>
 
-          {/* Things to do — case manager's own action items: screening, assignment paperwork, approvals */}
-          <div className="bg-white rounded-lg p-5 shadow-sm border border-border flex flex-col h-[475px]">
-            <div className="flex items-center justify-between mb-4">
+          {/* Things to do — empty state */}
+          <div className="bg-white rounded-lg p-5 shadow-sm border border-border flex flex-col h-full">
+            <div className="flex items-center justify-between mb-4 shrink-0">
               <h2 className="text-base font-bold text-brand-navy flex items-center gap-2">
                 <ListChecks className="w-4 h-4" />
                 Things to do
-                <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-brand-red text-white text-[10px] font-bold">
-                  {caseManagerTasks.length}
-                </span>
+                <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-emerald-500 text-white text-[10px] font-bold">0</span>
               </h2>
-              <Link to="/actions" className="text-xs text-brand-blue font-medium hover:underline">View all {caseManagerTasks.length} requests</Link>
             </div>
-            <ul className="space-y-3">
-              {caseManagerTasks.map((t) => (
-                <li key={t.id} className={`rounded-lg border px-3 py-2 ${t.urgent ? "border-brand-red/30 bg-brand-red/5" : "border-border bg-accent/20"}`}>
-                  <div className="flex items-center gap-3">
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <ApplicationBadge app={t.app} />
-                        <span className="text-[10px] text-muted-foreground">{t.label}</span>
-                        <span className="text-[10px] text-muted-foreground">· Due <span className={t.urgent ? "text-brand-red font-medium" : ""}>{t.dueDate}</span></span>
-                      </div>
-                      <p className="text-sm font-semibold text-brand-navy truncate mt-0.5">{t.title}</p>
-                    </div>
-                    <Link
-                      to="/case/$caseId"
-                      params={{ caseId: t.caseId }}
-                      aria-label={`Open ${t.caseId}`}
-                      className={`shrink-0 w-8 h-8 grid place-items-center rounded-full transition-colors ${t.urgent ? "text-brand-red hover:bg-brand-red/10" : "text-brand-blue hover:bg-brand-blue/10"}`}
-                    >
-                      <ChevronRight className="w-4 h-4" />
-                    </Link>
-                  </div>
-                </li>
-              ))}
-            </ul>
-            {caseManagerTasks.length === 1 && (
-              <div className="flex-1 flex flex-col items-center justify-center gap-2 text-center px-6">
-                <Sparkles className="w-5 h-5 text-muted-foreground/20" />
-                <p className="text-[11px] text-muted-foreground/50 leading-relaxed max-w-[220px]">
-                  Down to the last one — practically legendary. Want SLA trends, caseload stats, or just a pep talk? Ask Immibro.
+
+            <div className="flex-1 flex flex-col items-center justify-center gap-5 text-center px-6">
+              <div className="w-16 h-16 rounded-full bg-emerald-50 grid place-items-center">
+                <PartyPopper className="w-8 h-8 text-emerald-500" />
+              </div>
+              <div className="space-y-1.5">
+                <p className="text-base font-bold text-brand-navy">Queue: 0. Legendary status: achieved.</p>
+                <p className="text-sm text-muted-foreground max-w-[260px] leading-relaxed">
+                  Your things-to-do is emptier than a passport on day one. You can ask anything mobility with{" "}
+                  <button
+                    type="button"
+                    onClick={() => window.dispatchEvent(new CustomEvent("immibro:open"))}
+                    className="text-brand-blue font-semibold hover:underline"
+                  >
+                    Immibro
+                  </button>.
                 </p>
               </div>
-            )}
+              <div className="flex flex-col gap-2 w-full max-w-[264px]">
+                <Link
+                  to="/actions"
+                  className="flex items-center justify-center gap-2 bg-brand-blue text-white rounded-lg px-4 py-2.5 text-sm font-semibold hover:bg-brand-blue/90 transition-colors"
+                >
+                  <ListChecks className="w-4 h-4" />
+                  Open To-do
+                </Link>
+                <button
+                  type="button"
+                  onClick={scrollToAllCases}
+                  className="flex items-center justify-center gap-2 bg-white border border-brand-navy text-brand-navy rounded-lg px-4 py-2.5 text-sm font-semibold hover:bg-brand-navy hover:text-white transition-colors"
+                >
+                  <CheckCircle2 className="w-4 h-4" />
+                  View all case you've taken action
+                </button>
+              </div>
+            </div>
           </div>
         </section>
 
@@ -410,33 +314,30 @@ function Dashboard() {
         <section className="space-y-3">
           <h2 className="text-base font-bold text-brand-navy">Applications</h2>
           <div className="grid grid-cols-6 gap-3">
-          {categories.map(({ label, Icon }) => {
-            const isImmigration = label === "Immigration";
-            const base = "flex items-center gap-3 bg-white border border-border rounded-lg px-4 py-3 text-sm font-semibold text-brand-navy shadow-sm hover:bg-brand-navy hover:text-white transition-colors group";
-            if (isImmigration) {
+            {categories.map(({ label, Icon }) => {
+              const isImmigration = label === "Immigration";
+              const base = "flex items-center gap-3 bg-white border border-border rounded-lg px-4 py-3 text-sm font-semibold text-brand-navy shadow-sm hover:bg-brand-navy hover:text-white transition-colors group";
+              if (isImmigration) {
+                return (
+                  <Link key={label} to="/immigration" className={base}>
+                    <Icon className="w-4 h-4 text-brand-blue group-hover:text-white transition-colors" />
+                    {label}
+                  </Link>
+                );
+              }
               return (
-                <Link key={label} to="/immigration" className={base}>
+                <button key={label} type="button" className={base}>
                   <Icon className="w-4 h-4 text-brand-blue group-hover:text-white transition-colors" />
                   {label}
-                </Link>
+                </button>
               );
-            }
-            return (
-              <button key={label} type="button" className={base}>
-                <Icon className="w-4 h-4 text-brand-blue group-hover:text-white transition-colors" />
-                {label}
-              </button>
-            );
-          })}
+            })}
           </div>
         </section>
 
-
-
-
-        {/* All Cases */}
-        <section>
-          <div className="bg-white rounded-lg p-6 shadow-sm self-start">
+        {/* All Cases — actioned */}
+        <section ref={allCasesRef}>
+          <div className="bg-white rounded-lg p-6 shadow-sm">
             <div className="flex items-center justify-between gap-3">
               <TooltipProvider>
                 <Tooltip>
@@ -447,7 +348,7 @@ function Dashboard() {
                     </h2>
                   </TooltipTrigger>
                   <TooltipContent side="right">
-                    All requests that are allocated to you.
+                    All requests you've taken action on.
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
@@ -455,9 +356,9 @@ function Dashboard() {
 
             <div className="mt-4 border-b border-border flex items-center gap-8">
               {([
-                { key: "all", label: "All Cases" },
-                { key: "ongoing", label: "Ongoing" },
-                { key: "sla", label: "Nearing SLA" },
+                { key: "all",      label: "All Cases"        },
+                { key: "ongoing",  label: "Ongoing"          },
+                { key: "sla",      label: "Nearing SLA"      },
                 { key: "approval", label: "Pending approval" },
               ] as const).map(({ key, label }) => (
                 <button
@@ -475,7 +376,6 @@ function Dashboard() {
               ))}
             </div>
 
-
             <div className="mt-5 flex items-center justify-end gap-3">
               <Popover>
                 <PopoverTrigger asChild>
@@ -489,9 +389,7 @@ function Dashboard() {
                     <div className="space-y-1.5">
                       <Label className="text-xs font-semibold text-brand-navy">Destination country</Label>
                       <Select>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select country" />
-                        </SelectTrigger>
+                        <SelectTrigger><SelectValue placeholder="Select country" /></SelectTrigger>
                         <SelectContent>
                           <SelectItem value="portugal">Portugal</SelectItem>
                           <SelectItem value="germany">Germany</SelectItem>
@@ -505,9 +403,7 @@ function Dashboard() {
                     <div className="space-y-1.5">
                       <Label className="text-xs font-semibold text-brand-navy">Visa Type</Label>
                       <Select>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select visa type" />
-                        </SelectTrigger>
+                        <SelectTrigger><SelectValue placeholder="Select visa type" /></SelectTrigger>
                         <SelectContent>
                           <SelectItem value="work">Work Permit</SelectItem>
                           <SelectItem value="business">Business Visa</SelectItem>
@@ -519,9 +415,7 @@ function Dashboard() {
                     <div className="space-y-1.5">
                       <Label className="text-xs font-semibold text-brand-navy">Sort by</Label>
                       <Select>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select sort option" />
-                        </SelectTrigger>
+                        <SelectTrigger><SelectValue placeholder="Select sort option" /></SelectTrigger>
                         <SelectContent>
                           <SelectItem value="sla-high">SLA: High to Low</SelectItem>
                           <SelectItem value="sla-low">SLA: Low to High</SelectItem>
@@ -550,7 +444,6 @@ function Dashboard() {
               </div>
             </div>
 
-
             <div className="mt-4 overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
@@ -572,26 +465,19 @@ function Dashboard() {
                   </tr>
                 </thead>
                 <tbody>
-                  {sortedRows.map((r, i) => {
-                    const isPastDue = r[5] === true;
-                    return (
-                      <tr key={i} className="border-b border-border/60 hover:bg-accent/40">
-                        <td className="px-4 py-3.5">
-                          <Link
-                            to="/case/$caseId"
-                            params={{ caseId: String(r[0]) }}
-                            className="text-brand-blue underline"
-                          >
-                            {r[0]}
-                          </Link>
-                        </td>
-                        <td className="px-4 py-3.5 text-foreground">{r[1]}</td>
-                        <td className="px-4 py-3.5 text-foreground">{r[2]}</td>
-                        <td className="px-4 py-3.5"><StatusPill status={String(r[3])} /></td>
-                        <td className={`px-4 py-3.5 text-sm font-medium ${isPastDue ? "text-brand-red" : "text-foreground"}`}>{r[4]}</td>
-                      </tr>
-                    );
-                  })}
+                  {sortedRows.map((r, i) => (
+                    <tr key={i} className="border-b border-border/60 hover:bg-accent/40">
+                      <td className="px-4 py-3.5">
+                        <Link to="/case/$caseId" params={{ caseId: String(r[0]) }} className="text-brand-blue underline">
+                          {r[0]}
+                        </Link>
+                      </td>
+                      <td className="px-4 py-3.5 text-foreground">{r[1]}</td>
+                      <td className="px-4 py-3.5 text-foreground">{r[2]}</td>
+                      <td className="px-4 py-3.5"><StatusPill status={String(r[3])} /></td>
+                      <td className="px-4 py-3.5 text-sm font-medium text-foreground">{r[4]}</td>
+                    </tr>
+                  ))}
                 </tbody>
               </table>
             </div>
@@ -604,9 +490,7 @@ function Dashboard() {
               {[1, 2, 3].map((p) => (
                 <button
                   key={p}
-                  className={`w-8 h-8 rounded text-sm font-medium transition-colors ${
-                    p === 1 ? "bg-brand-navy text-white" : "text-muted-foreground hover:bg-accent"
-                  }`}
+                  className={`w-8 h-8 rounded text-sm font-medium transition-colors ${p === 1 ? "bg-brand-navy text-white" : "text-muted-foreground hover:bg-accent"}`}
                 >
                   {p}
                 </button>
@@ -655,61 +539,6 @@ function Dashboard() {
           <ul className="flex-1 overflow-y-auto divide-y divide-border">
             <li className="p-8 text-center text-sm text-muted-foreground">No alerts right now.</li>
           </ul>
-        </SheetContent>
-      </Sheet>
-
-      <Sheet open={openCaseList !== null} onOpenChange={(o) => !o && setOpenCaseList(null)}>
-        <SheetContent side="right" className="w-full sm:max-w-2xl p-0 flex flex-col">
-          <SheetHeader className="p-6 border-b border-border">
-            <SheetTitle className="text-brand-navy">{openCaseList}</SheetTitle>
-          </SheetHeader>
-          <div className="p-6 space-y-4 overflow-y-auto">
-            <div className="relative">
-              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-              <input
-                placeholder="Search with case number, country, status"
-                className="w-full h-9 pl-9 pr-24 border-b border-border bg-transparent text-sm placeholder:text-muted-foreground focus:outline-none focus:border-brand-blue"
-              />
-              <button className="absolute right-0 top-1/2 -translate-y-1/2 inline-flex items-center gap-1.5 bg-brand-navy text-white px-3 py-1.5 rounded text-xs font-medium hover:bg-brand-navy/90 transition-colors">
-                <Search className="w-3.5 h-3.5" />
-                Search
-              </button>
-            </div>
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="bg-table-head/60 text-brand-navy">
-                    <th className="text-left font-semibold px-4 py-3">
-                      <span className="inline-flex items-center gap-1">
-                        Case No. <ArrowDown className="w-3 h-3" />
-                      </span>
-                    </th>
-                    <th className="text-left font-semibold px-4 py-3">Destination Country</th>
-                    <th className="text-left font-semibold px-4 py-3">Status</th>
-                    <th className="text-left font-semibold px-4 py-3">Travel start date</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {overlayCases.map((r, i) => (
-                    <tr key={i} className="border-b border-border/60 hover:bg-accent/40">
-                      <td className="px-4 py-3.5">
-                        <Link
-                          to="/case/$caseId"
-                          params={{ caseId: r[0] }}
-                          className="text-brand-blue underline"
-                        >
-                          {r[0]}
-                        </Link>
-                      </td>
-                      <td className="px-4 py-3.5 text-foreground">{r[1]}</td>
-                      <td className="px-4 py-3.5 text-foreground">{r[2]}</td>
-                      <td className="px-4 py-3.5 text-foreground">{r[3]}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
         </SheetContent>
       </Sheet>
 

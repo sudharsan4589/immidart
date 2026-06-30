@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as VisaGuideRouteImport } from './routes/visa-guide'
+import { Route as Supervisor5RouteImport } from './routes/supervisor5'
 import { Route as Supervisor4RouteImport } from './routes/supervisor4'
 import { Route as Supervisor3RouteImport } from './routes/supervisor3'
 import { Route as Supervisor2RouteImport } from './routes/supervisor2'
@@ -18,7 +19,9 @@ import { Route as SearchRouteImport } from './routes/search'
 import { Route as ReportsRouteImport } from './routes/reports'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as Index2RouteImport } from './routes/index2'
 import { Route as ImmigrationRouteImport } from './routes/immigration'
+import { Route as Employee2RouteImport } from './routes/employee2'
 import { Route as EmployeeLiteRouteImport } from './routes/employee-lite'
 import { Route as EmployeeRouteImport } from './routes/employee'
 import { Route as AssignmentRequestRouteImport } from './routes/assignment-request'
@@ -30,6 +33,11 @@ import { Route as CaseCaseIdRouteImport } from './routes/case.$caseId'
 const VisaGuideRoute = VisaGuideRouteImport.update({
   id: '/visa-guide',
   path: '/visa-guide',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const Supervisor5Route = Supervisor5RouteImport.update({
+  id: '/supervisor5',
+  path: '/supervisor5',
   getParentRoute: () => rootRouteImport,
 } as any)
 const Supervisor4Route = Supervisor4RouteImport.update({
@@ -72,9 +80,19 @@ const LoginRoute = LoginRouteImport.update({
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
+const Index2Route = Index2RouteImport.update({
+  id: '/index2',
+  path: '/index2',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ImmigrationRoute = ImmigrationRouteImport.update({
   id: '/immigration',
   path: '/immigration',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const Employee2Route = Employee2RouteImport.update({
+  id: '/employee2',
+  path: '/employee2',
   getParentRoute: () => rootRouteImport,
 } as any)
 const EmployeeLiteRoute = EmployeeLiteRouteImport.update({
@@ -119,7 +137,9 @@ export interface FileRoutesByFullPath {
   '/assignment-request': typeof AssignmentRequestRoute
   '/employee': typeof EmployeeRoute
   '/employee-lite': typeof EmployeeLiteRoute
+  '/employee2': typeof Employee2Route
   '/immigration': typeof ImmigrationRoute
+  '/index2': typeof Index2Route
   '/login': typeof LoginRoute
   '/profile': typeof ProfileRoute
   '/reports': typeof ReportsRouteWithChildren
@@ -128,6 +148,7 @@ export interface FileRoutesByFullPath {
   '/supervisor2': typeof Supervisor2Route
   '/supervisor3': typeof Supervisor3Route
   '/supervisor4': typeof Supervisor4Route
+  '/supervisor5': typeof Supervisor5Route
   '/visa-guide': typeof VisaGuideRoute
   '/case/$caseId': typeof CaseCaseIdRoute
   '/reports/$appId': typeof ReportsAppIdRoute
@@ -138,7 +159,9 @@ export interface FileRoutesByTo {
   '/assignment-request': typeof AssignmentRequestRoute
   '/employee': typeof EmployeeRoute
   '/employee-lite': typeof EmployeeLiteRoute
+  '/employee2': typeof Employee2Route
   '/immigration': typeof ImmigrationRoute
+  '/index2': typeof Index2Route
   '/login': typeof LoginRoute
   '/profile': typeof ProfileRoute
   '/reports': typeof ReportsRouteWithChildren
@@ -147,6 +170,7 @@ export interface FileRoutesByTo {
   '/supervisor2': typeof Supervisor2Route
   '/supervisor3': typeof Supervisor3Route
   '/supervisor4': typeof Supervisor4Route
+  '/supervisor5': typeof Supervisor5Route
   '/visa-guide': typeof VisaGuideRoute
   '/case/$caseId': typeof CaseCaseIdRoute
   '/reports/$appId': typeof ReportsAppIdRoute
@@ -158,7 +182,9 @@ export interface FileRoutesById {
   '/assignment-request': typeof AssignmentRequestRoute
   '/employee': typeof EmployeeRoute
   '/employee-lite': typeof EmployeeLiteRoute
+  '/employee2': typeof Employee2Route
   '/immigration': typeof ImmigrationRoute
+  '/index2': typeof Index2Route
   '/login': typeof LoginRoute
   '/profile': typeof ProfileRoute
   '/reports': typeof ReportsRouteWithChildren
@@ -167,6 +193,7 @@ export interface FileRoutesById {
   '/supervisor2': typeof Supervisor2Route
   '/supervisor3': typeof Supervisor3Route
   '/supervisor4': typeof Supervisor4Route
+  '/supervisor5': typeof Supervisor5Route
   '/visa-guide': typeof VisaGuideRoute
   '/case/$caseId': typeof CaseCaseIdRoute
   '/reports/$appId': typeof ReportsAppIdRoute
@@ -179,7 +206,9 @@ export interface FileRouteTypes {
     | '/assignment-request'
     | '/employee'
     | '/employee-lite'
+    | '/employee2'
     | '/immigration'
+    | '/index2'
     | '/login'
     | '/profile'
     | '/reports'
@@ -188,6 +217,7 @@ export interface FileRouteTypes {
     | '/supervisor2'
     | '/supervisor3'
     | '/supervisor4'
+    | '/supervisor5'
     | '/visa-guide'
     | '/case/$caseId'
     | '/reports/$appId'
@@ -198,7 +228,9 @@ export interface FileRouteTypes {
     | '/assignment-request'
     | '/employee'
     | '/employee-lite'
+    | '/employee2'
     | '/immigration'
+    | '/index2'
     | '/login'
     | '/profile'
     | '/reports'
@@ -207,6 +239,7 @@ export interface FileRouteTypes {
     | '/supervisor2'
     | '/supervisor3'
     | '/supervisor4'
+    | '/supervisor5'
     | '/visa-guide'
     | '/case/$caseId'
     | '/reports/$appId'
@@ -217,7 +250,9 @@ export interface FileRouteTypes {
     | '/assignment-request'
     | '/employee'
     | '/employee-lite'
+    | '/employee2'
     | '/immigration'
+    | '/index2'
     | '/login'
     | '/profile'
     | '/reports'
@@ -226,6 +261,7 @@ export interface FileRouteTypes {
     | '/supervisor2'
     | '/supervisor3'
     | '/supervisor4'
+    | '/supervisor5'
     | '/visa-guide'
     | '/case/$caseId'
     | '/reports/$appId'
@@ -237,7 +273,9 @@ export interface RootRouteChildren {
   AssignmentRequestRoute: typeof AssignmentRequestRoute
   EmployeeRoute: typeof EmployeeRoute
   EmployeeLiteRoute: typeof EmployeeLiteRoute
+  Employee2Route: typeof Employee2Route
   ImmigrationRoute: typeof ImmigrationRoute
+  Index2Route: typeof Index2Route
   LoginRoute: typeof LoginRoute
   ProfileRoute: typeof ProfileRoute
   ReportsRoute: typeof ReportsRouteWithChildren
@@ -246,6 +284,7 @@ export interface RootRouteChildren {
   Supervisor2Route: typeof Supervisor2Route
   Supervisor3Route: typeof Supervisor3Route
   Supervisor4Route: typeof Supervisor4Route
+  Supervisor5Route: typeof Supervisor5Route
   VisaGuideRoute: typeof VisaGuideRoute
   CaseCaseIdRoute: typeof CaseCaseIdRoute
 }
@@ -257,6 +296,13 @@ declare module '@tanstack/react-router' {
       path: '/visa-guide'
       fullPath: '/visa-guide'
       preLoaderRoute: typeof VisaGuideRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/supervisor5': {
+      id: '/supervisor5'
+      path: '/supervisor5'
+      fullPath: '/supervisor5'
+      preLoaderRoute: typeof Supervisor5RouteImport
       parentRoute: typeof rootRouteImport
     }
     '/supervisor4': {
@@ -315,11 +361,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/index2': {
+      id: '/index2'
+      path: '/index2'
+      fullPath: '/index2'
+      preLoaderRoute: typeof Index2RouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/immigration': {
       id: '/immigration'
       path: '/immigration'
       fullPath: '/immigration'
       preLoaderRoute: typeof ImmigrationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/employee2': {
+      id: '/employee2'
+      path: '/employee2'
+      fullPath: '/employee2'
+      preLoaderRoute: typeof Employee2RouteImport
       parentRoute: typeof rootRouteImport
     }
     '/employee-lite': {
@@ -391,7 +451,9 @@ const rootRouteChildren: RootRouteChildren = {
   AssignmentRequestRoute: AssignmentRequestRoute,
   EmployeeRoute: EmployeeRoute,
   EmployeeLiteRoute: EmployeeLiteRoute,
+  Employee2Route: Employee2Route,
   ImmigrationRoute: ImmigrationRoute,
+  Index2Route: Index2Route,
   LoginRoute: LoginRoute,
   ProfileRoute: ProfileRoute,
   ReportsRoute: ReportsRouteWithChildren,
@@ -400,6 +462,7 @@ const rootRouteChildren: RootRouteChildren = {
   Supervisor2Route: Supervisor2Route,
   Supervisor3Route: Supervisor3Route,
   Supervisor4Route: Supervisor4Route,
+  Supervisor5Route: Supervisor5Route,
   VisaGuideRoute: VisaGuideRoute,
   CaseCaseIdRoute: CaseCaseIdRoute,
 }

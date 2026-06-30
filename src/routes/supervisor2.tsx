@@ -229,102 +229,12 @@ function SupervisorDashboardV2() {
             </div>
           </div>
 
-          {/* Things to do */}
-          <div className="bg-white rounded-lg p-5 shadow-sm border border-border flex flex-col h-full">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-base font-bold text-brand-navy flex items-center gap-2">
-                <ListChecks className="w-4 h-4" />
-                Things to do
-                <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-brand-red text-white text-[10px] font-bold">{supervisorTasks.length}</span>
-              </h2>
-              <Link to="/actions" className="text-xs text-brand-blue font-medium hover:underline">View all {supervisorTasks.length} requests</Link>
-            </div>
-
-            <Tabs value={todoTab} onValueChange={(v) => setTodoTab(v as SupervisorTodoTabKey)} className="flex-1 flex flex-col">
-              <div className="flex items-center gap-2 mb-3">
-                <TabsList className="self-start">
-                  {supervisorTodoTabs.map(({ key, label }) => {
-                    const count = supervisorTasks.filter((t) => t.type === key).length;
-                    return (
-                      <TabsTrigger key={key} value={key} className="gap-1.5">
-                        {label}
-                        <span className={`inline-flex items-center justify-center min-w-[16px] h-4 px-1 rounded-full text-[9px] font-bold ${todoTab === key ? "bg-brand-blue text-white" : "bg-muted-foreground/20 text-muted-foreground"}`}>
-                          {count}
-                        </span>
-                      </TabsTrigger>
-                    );
-                  })}
-                </TabsList>
-                <TooltipProvider delayDuration={150}>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <button type="button" aria-label="Access info" className="text-muted-foreground hover:text-brand-blue cursor-help shrink-0">
-                        <Info className="w-3.5 h-3.5" />
-                      </button>
-                    </TooltipTrigger>
-                    <TooltipContent side="top" className="max-w-xs">
-                      You have access both as an Employee (Assignee) and Supervisor
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              </div>
-
-              {supervisorTodoTabs.map(({ key }) => {
-                const filtered = supervisorTasks.filter((t) => t.type === key);
-                return (
-                  <TabsContent key={key} value={key} className="flex-1 mt-0 overflow-hidden flex flex-col">
-                    {filtered.length === 0 ? (
-                      <div className="flex items-center justify-center h-full text-sm text-muted-foreground py-8">
-                        Nothing here right now.
-                      </div>
-                    ) : (
-                      <div className="flex flex-col flex-1 min-h-0 overflow-hidden">
-                        <ul className="space-y-3 overflow-y-auto flex-1 min-h-0">
-                          {filtered.map((t) => (
-                            <li key={t.id} className={`rounded-lg border px-3 py-2 ${t.urgent ? "border-brand-red/30 bg-brand-red/5" : "border-border bg-accent/20"}`}>
-                              <div className="flex items-center gap-3">
-                                <div className="min-w-0 flex-1">
-                                  <div className="flex items-center gap-2 flex-wrap">
-                                    <ApplicationBadge app={t.app} />
-                                    <span className="text-[10px] text-muted-foreground">{t.label}</span>
-                                    <span className="text-[10px] text-muted-foreground">· Due <span className={t.urgent ? "text-brand-red font-medium" : ""}>{t.dueDate}</span></span>
-                                  </div>
-                                  <p className="text-sm font-semibold text-brand-navy truncate mt-0.5">{t.title}</p>
-                                </div>
-                                <Link
-                                  to="/case/$caseId"
-                                  params={{ caseId: t.caseId }}
-                                  aria-label={`Open ${t.caseId}`}
-                                  className={`shrink-0 w-8 h-8 grid place-items-center rounded-full transition-colors ${t.urgent ? "text-brand-red hover:bg-brand-red/10" : "text-brand-blue hover:bg-brand-blue/10"}`}
-                                >
-                                  <ChevronRight className="w-4 h-4" />
-                                </Link>
-                              </div>
-                            </li>
-                          ))}
-                        </ul>
-                        {filtered.length === 1 && (
-                          <div className="flex-1 flex flex-col items-center justify-center gap-2 text-center px-6">
-                            <Sparkles className="w-5 h-5 text-muted-foreground/20" />
-                            <p className="text-[11px] text-muted-foreground/50 leading-relaxed max-w-[220px]">
-                              Down to the last one, good going! Want caseload, or just a pep talk about global mobility policies? Ask Immibro.
-                            </p>
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </TabsContent>
-                );
-              })}
-            </Tabs>
-          </div>
-
-          {/* Your Assignment */}
+          {/* Your Assignment — middle column */}
           <div className="bg-white rounded-lg p-5 shadow-sm border border-border flex flex-col h-full overflow-hidden">
             <div className="flex items-center gap-2 mb-4 shrink-0">
               <h2 className="text-base font-bold text-brand-navy flex items-center gap-2">
                 <Briefcase className="w-4 h-4" />
-                Your assignment
+                Your immigration request
               </h2>
             </div>
 
@@ -452,6 +362,96 @@ function SupervisorDashboardV2() {
               </div>
 
             </div>
+          </div>
+
+          {/* Things to do — rightmost column */}
+          <div className="bg-white rounded-lg p-5 shadow-sm border border-border flex flex-col h-full">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-base font-bold text-brand-navy flex items-center gap-2">
+                <ListChecks className="w-4 h-4" />
+                Things to do
+                <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-brand-red text-white text-[10px] font-bold">{supervisorTasks.length}</span>
+              </h2>
+              <Link to="/actions" className="text-xs text-brand-blue font-medium hover:underline">View all {supervisorTasks.length} requests</Link>
+            </div>
+
+            <Tabs value={todoTab} onValueChange={(v) => setTodoTab(v as SupervisorTodoTabKey)} className="flex-1 flex flex-col">
+              <div className="flex items-center gap-2 mb-3">
+                <TabsList className="self-start">
+                  {supervisorTodoTabs.map(({ key, label }) => {
+                    const count = supervisorTasks.filter((t) => t.type === key).length;
+                    return (
+                      <TabsTrigger key={key} value={key} className="gap-1.5">
+                        {label}
+                        <span className={`inline-flex items-center justify-center min-w-[16px] h-4 px-1 rounded-full text-[9px] font-bold ${todoTab === key ? "bg-brand-blue text-white" : "bg-muted-foreground/20 text-muted-foreground"}`}>
+                          {count}
+                        </span>
+                      </TabsTrigger>
+                    );
+                  })}
+                </TabsList>
+                <TooltipProvider delayDuration={150}>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button type="button" aria-label="Access info" className="text-muted-foreground hover:text-brand-blue cursor-help shrink-0">
+                        <Info className="w-3.5 h-3.5" />
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent side="top" className="max-w-xs">
+                      You have access both as an Employee (Assignee) and Supervisor
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </div>
+
+              {supervisorTodoTabs.map(({ key }) => {
+                const filtered = supervisorTasks.filter((t) => t.type === key);
+                return (
+                  <TabsContent key={key} value={key} className="flex-1 mt-0 overflow-hidden flex flex-col">
+                    {filtered.length === 0 ? (
+                      <div className="flex items-center justify-center h-full text-sm text-muted-foreground py-8">
+                        Nothing here right now.
+                      </div>
+                    ) : (
+                      <div className="flex flex-col flex-1 min-h-0 overflow-hidden">
+                        <ul className="space-y-3 overflow-y-auto flex-1 min-h-0">
+                          {filtered.map((t) => (
+                            <li key={t.id} className={`rounded-lg border px-3 py-2 ${t.urgent ? "border-brand-red/30 bg-brand-red/5" : "border-border bg-accent/20"}`}>
+                              <div className="flex items-center gap-3">
+                                <div className="min-w-0 flex-1">
+                                  <div className="flex items-center gap-2 flex-wrap">
+                                    <ApplicationBadge app={t.app} />
+                                    <span className="text-[10px] text-muted-foreground">{t.label}</span>
+                                    <span className="text-[10px] text-muted-foreground">· Due <span className={t.urgent ? "text-brand-red font-medium" : ""}>{t.dueDate}</span></span>
+                                  </div>
+                                  <p className="text-sm font-semibold text-brand-navy truncate mt-0.5">{t.title}</p>
+                                </div>
+                                <Link
+                                  to="/case/$caseId"
+                                  params={{ caseId: t.caseId }}
+                                  aria-label={`Open ${t.caseId}`}
+                                  className={`shrink-0 w-8 h-8 grid place-items-center rounded-full transition-colors ${t.urgent ? "text-brand-red hover:bg-brand-red/10" : "text-brand-blue hover:bg-brand-blue/10"}`}
+                                >
+                                  <ChevronRight className="w-4 h-4" />
+                                </Link>
+                              </div>
+                            </li>
+                          ))}
+                        </ul>
+                        {filtered.length === 1 && (
+                          <div className="flex-1 flex flex-col items-center justify-center gap-2 text-center px-6">
+                            <Sparkles className="w-5 h-5 text-muted-foreground/20" />
+                            <p className="text-[11px] text-muted-foreground/50 leading-relaxed max-w-[220px]">
+                              Down to the last one, good going! Want caseload, or just a pep talk about global mobility policies? Ask Immibro.
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </TabsContent>
+                );
+              })}
+            </Tabs>
           </div>
 
         </section>

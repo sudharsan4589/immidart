@@ -46,10 +46,10 @@ export const Route = createFileRoute("/supervisor4")({
 // All KPI values intentionally zero — supervisor has nothing outstanding.
 
 const stats = [
-  { label: "Pending Approvals",       value: "00", badge: "Nothing to sign off", tone: "green" as const },
-  { label: "Team Members Abroad",     value: "00", badge: "No active travel",    tone: "green" as const },
-  { label: "Cases In Progress",       value: "00", badge: "All cases closed",    tone: "green" as const },
-  { label: "Total Team Assignments",  value: "00", badge: "No history yet",      tone: "green" as const },
+  { label: "Pending Approvals",       value: "00",  badge: "Nothing to sign off", tone: "green" as const },
+  { label: "Team Members Abroad",     value: "12",  badge: "On assignment",        tone: "blue"  as const },
+  { label: "Cases In Progress",       value: "23",  badge: "Across all stages",    tone: "blue"  as const },
+  { label: "Total Team Assignments",  value: "148", badge: "All time",             tone: "green" as const },
 ];
 
 // Things to do — empty in this state, triggers the "You're all caught up!" message

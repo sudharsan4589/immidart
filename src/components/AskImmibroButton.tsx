@@ -46,6 +46,12 @@ export function AskImmibroButton() {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, typing]);
 
+  useEffect(() => {
+    const handler = () => setOpen(true);
+    window.addEventListener("immibro:open", handler);
+    return () => window.removeEventListener("immibro:open", handler);
+  }, []);
+
   function send() {
     const text = input.trim();
     if (!text) return;

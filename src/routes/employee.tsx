@@ -24,6 +24,9 @@ import {
   ArrowRight,
   CheckCircle2,
   Clock,
+  Scale,
+  Building2,
+  Mail,
 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -116,12 +119,14 @@ const assignmentSteps = ["Initiated", "Documents", "Filing", "Decision", "Active
 const currentAssignmentStep = 1; // currently at "Documents"
 const assignmentProgress = Math.round((currentAssignmentStep / (assignmentSteps.length - 1)) * 100);
 
-// Application categories — static 2×2 grid
 const appCategories = [
-  { label: "Assignments", Icon: Briefcase, desc: "Your relocations & transfers", to: "/" as const },
-  { label: "Immigration", Icon: Globe2, desc: "Visas & work permits", to: "/immigration" as const },
-  { label: "Travel", Icon: Plane, desc: "Business trips & bookings", to: "/" as const },
-  { label: "Coverage", Icon: ShieldCheck, desc: "Insurance & certificates", to: "/" as const },
+  { label: "Assignments",  Icon: Briefcase,  to: "/" as const           },
+  { label: "Immigration",  Icon: Globe2,      to: "/immigration" as const },
+  { label: "Travel",       Icon: Plane,       to: "/" as const           },
+  { label: "Coverage",     Icon: ShieldCheck, to: "/" as const           },
+  { label: "LCA",          Icon: Scale,       to: "/" as const           },
+  { label: "Compliance",   Icon: Building2,   to: "/" as const           },
+  { label: "Invite Letter",Icon: Mail,        to: "/" as const           },
 ];
 
 const documents = [
@@ -218,142 +223,80 @@ function EmployeeHome() {
       <main className="max-w-[1400px] mx-auto px-8 py-8 space-y-6">
 
 {/* Reportee's overdue requests — shown when user is also a supervisor */}
-        <MyAssignmentCard />
+        <MyAssignmentCard statusLabel="Pending for employee submission" />
 
         <section className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch lg:h-[475px]">
 
           {/* Your Assignment */}
-          <div className="bg-white rounded-lg p-5 shadow-sm border border-border flex flex-col h-full overflow-hidden">
-            <div className="flex items-center gap-2 mb-4 shrink-0">
-              <h2 className="text-base font-bold text-brand-navy flex items-center gap-2">
-                <Briefcase className="w-4 h-4" />
-                Your assignment
-              </h2>
+          <div className="bg-white rounded-lg p-5 shadow-sm border border-border flex flex-col h-full">
+            {/* Header */}
+            <h2 className="text-base font-bold text-brand-navy flex items-center gap-2 mb-4 shrink-0">
+              <Briefcase className="w-4 h-4" />
+              Your immigration request
+            </h2>
+
+            {/* Flag progress bar */}
+            <div className="bg-brand-canvas rounded-lg px-4 py-3 mb-4 shrink-0">
+              <div className="flex items-center gap-3">
+                <div className="flex flex-col items-center shrink-0">
+                  <FlagIcon code="in" className="text-2xl" />
+                  <span className="text-[11px] font-semibold text-brand-navy mt-0.5">IND</span>
+                </div>
+                <div className="flex-1 flex flex-col gap-1.5">
+                  <div className="relative pt-4">
+                    <div className="absolute top-0 -translate-x-1/2 transition-all duration-700" style={{ left: `${assignmentProgress}%` }}>
+                      <Plane className="w-3.5 h-3.5 text-brand-blue rotate-45" />
+                    </div>
+                    <div className="relative h-2 bg-border/70 rounded-full overflow-hidden">
+                      <div
+                        className="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-brand-blue via-brand-sky to-brand-blue/60 transition-all duration-700"
+                        style={{ width: `${assignmentProgress}%` }}
+                      />
+                    </div>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-[10px] text-muted-foreground">{assignmentSteps[currentAssignmentStep]}</span>
+                    <span className="text-[10px] font-semibold text-brand-blue">{assignmentProgress}% complete</span>
+                  </div>
+                </div>
+                <div className="flex flex-col items-center shrink-0">
+                  <FlagIcon code="us" className="text-2xl" />
+                  <span className="text-[11px] font-semibold text-brand-navy mt-0.5">US</span>
+                </div>
+              </div>
             </div>
 
-            {/* Two-column body */}
-            <div className="flex-1 flex gap-4 min-h-0">
-
-              {/* Left column — 432px */}
-              <div className="w-[432px] shrink-0 flex flex-col">
-                {/* Flag progress bar */}
-                <div className="bg-brand-canvas rounded-lg px-4 py-3 mb-4 shrink-0">
-                  <div className="flex items-center gap-3">
-                    <div className="flex flex-col items-center shrink-0">
-                      <FlagIcon code="in" className="text-2xl" />
-                      <span className="text-[11px] font-semibold text-brand-navy mt-0.5">IND</span>
-                    </div>
-                    <div className="flex-1 flex flex-col gap-1.5">
-                      <div className="relative pt-4">
-                        <div className="absolute top-0 -translate-x-1/2 transition-all duration-700" style={{ left: `${assignmentProgress}%` }}>
-                          <Plane className="w-3.5 h-3.5 text-brand-blue rotate-45" />
-                        </div>
-                        <div className="relative h-2 bg-border/70 rounded-full overflow-hidden">
-                          <div
-                            className="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-brand-blue via-brand-sky to-brand-blue/60 transition-all duration-700"
-                            style={{ width: `${assignmentProgress}%` }}
-                          />
-                        </div>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-[10px] text-muted-foreground">{assignmentSteps[currentAssignmentStep]}</span>
-                        <span className="text-[10px] font-semibold text-brand-blue">{assignmentProgress}% complete</span>
-                      </div>
-                    </div>
-                    <div className="flex flex-col items-center shrink-0">
-                      <FlagIcon code="us" className="text-2xl" />
-                      <span className="text-[11px] font-semibold text-brand-navy mt-0.5">US</span>
-                    </div>
-                  </div>
+            {/* Meta details — 2×2 grid */}
+            <div className="grid grid-cols-2 gap-2 mb-4 shrink-0">
+              {[
+                { label: "Type",       value: "Permanent Transfer" },
+                { label: "Start date", value: "29 May 2026"        },
+                { label: "Visa type",  value: "Work Permit"        },
+                { label: "Case ref.",  value: "WP1039203903"       },
+              ].map(({ label, value }) => (
+                <div key={label} className="bg-accent/40 rounded-md px-3 py-2">
+                  <p className="text-[9px] text-muted-foreground uppercase tracking-wide mb-0.5">{label}</p>
+                  <p className="text-sm font-semibold text-brand-navy">{value}</p>
                 </div>
+              ))}
+            </div>
 
-                {/* Meta details */}
-                <div className="grid grid-cols-2 gap-2 mb-4 shrink-0">
-                  {[
-                    { label: "Type",       value: "Permanent Transfer" },
-                    { label: "Start date", value: "29 May 2026"        },
-                    { label: "Visa type",  value: "Work Permit"        },
-                    { label: "Case ref.",  value: "WP1039203903"       },
-                  ].map(({ label, value }) => (
-                    <div key={label} className="bg-accent/40 rounded-md px-2 py-1.5">
-                      <p className="text-[9px] text-muted-foreground uppercase tracking-wide mb-0.5">{label}</p>
-                      <p className="text-xs font-semibold text-brand-navy">{value}</p>
-                    </div>
-                  ))}
-                </div>
+            {/* Status + action buttons */}
+            <div className="mt-auto shrink-0 flex flex-col gap-2">
+              <StatusPill status="Pending for Screening" className="w-full justify-center py-3.5 text-[15px]" />
+              <Link to="/immigration" className="flex items-center justify-center gap-2 border border-brand-blue text-brand-blue rounded-lg px-4 py-2.5 text-sm font-semibold hover:bg-brand-blue/5 transition-colors">
+                <Globe2 className="w-4 h-4" />
+                View Immigration Request
+              </Link>
+              <Link to="/assignment-request" className="flex items-center justify-center gap-2 bg-white border border-brand-navy text-brand-navy rounded-lg px-4 py-2.5 text-sm font-semibold hover:bg-brand-navy hover:text-white transition-colors">
+                <Briefcase className="w-4 h-4" />
+                View Assignment Request
+              </Link>
+            </div>
 
-                {/* Status + stacked action buttons */}
-                <div className="mt-auto shrink-0">
-                  <div className="mb-2">
-                    <StatusPill status="Pending for Screening" className="w-full justify-center py-3.5 text-[15px]" />
-                  </div>
-                  <div className="flex flex-col gap-2">
-                    <Link to="/immigration" className="flex items-center justify-center gap-2 bg-transparent border border-brand-blue text-brand-blue rounded-lg px-4 py-2.5 text-sm font-semibold hover:bg-brand-blue/5 transition-colors">
-                      <Globe2 className="w-4 h-4" />
-                      View Immigration Request
-                    </Link>
-                    <Link to="/assignment-request" className="flex items-center justify-center gap-2 bg-white border border-brand-navy text-brand-navy rounded-lg px-4 py-2.5 text-sm font-semibold hover:bg-brand-navy hover:text-white transition-colors">
-                      <Briefcase className="w-4 h-4" />
-                      View Assignment Request
-                    </Link>
-                  </div>
-                </div>
-
-                {/* Footer */}
-                <div className="mt-3 pt-3 border-t border-border shrink-0">
-                  <span className="text-[11px] text-muted-foreground">Last updated: 15/May/2026</span>
-                </div>
-              </div>
-
-              {/* Right column — notification + milestones */}
-              <div className="flex-1 min-w-0 flex flex-col gap-2">
-
-                {/* Latest update — condensed */}
-                <div className="rounded-lg border border-border bg-accent/30 px-4 py-2.5 shrink-0">
-                  <div className="flex gap-2.5 items-start">
-                    <span className="mt-1 block w-2 h-2 rounded-full bg-brand-blue shrink-0" />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-[10px] text-muted-foreground uppercase tracking-wide font-semibold mb-0.5">Latest update</p>
-                      <p className="text-[12px] font-semibold text-brand-navy leading-snug">Work Permit Filing — Documents Submitted</p>
-                    </div>
-                  </div>
-                  <div className="mt-1.5 pl-4">
-                    <Link to="/immigration" className="text-[11px] font-semibold text-brand-blue hover:underline">
-                      Open request to read more →
-                    </Link>
-                  </div>
-                </div>
-
-                {/* Request progress */}
-                <div className="flex-1 min-h-0 flex flex-col gap-2">
-                  <p className="text-[10px] text-muted-foreground uppercase tracking-wide font-semibold shrink-0">Request progress</p>
-                  {/* Current milestone — card */}
-                  <div className="flex-1 flex items-center gap-3 px-3 rounded-lg border border-border bg-white shadow-sm">
-                    <div className="w-12 h-12 rounded-full bg-emerald-500 shrink-0 flex flex-col items-center justify-center text-white text-center">
-                      <span className="text-[8px] font-bold leading-tight">May 17,</span>
-                      <span className="text-[8px] font-bold leading-tight">2026</span>
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-[12px] font-semibold text-brand-navy leading-snug">LOA signed by Authorized Signatory</p>
-                      <p className="text-[11px] text-muted-foreground mt-1 leading-relaxed">The letter of assignment has been reviewed and countersigned. All required authorizations are in place to proceed.</p>
-                    </div>
-                    <span className="text-[10px] text-muted-foreground shrink-0 ml-2 self-start pt-0.5">15/May/2026</span>
-                  </div>
-                  {/* Next milestone — card, blinking, green */}
-                  <div className="flex-1 flex items-center gap-3 px-3 rounded-lg border border-border bg-white shadow-sm animate-pulse">
-                    <div className="w-12 h-12 rounded-full bg-emerald-400 shrink-0 flex flex-col items-center justify-center text-white text-center">
-                      <span className="text-[8px] font-bold leading-tight">Jun 19,</span>
-                      <span className="text-[8px] font-bold leading-tight">2026</span>
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-[12px] font-semibold text-brand-navy leading-snug">Employee acknowledgement pending</p>
-                      <p className="text-[11px] text-muted-foreground mt-1 leading-relaxed">Awaiting review and acceptance of the assignment terms outlined in the letter of assignment.</p>
-                    </div>
-                  </div>
-                </div>
-
-              </div>
-
+            {/* Footer */}
+            <div className="mt-3 pt-3 border-t border-border shrink-0">
+              <span className="text-[11px] text-muted-foreground">Last updated: 15/May/2026</span>
             </div>
           </div>
 
@@ -445,7 +388,7 @@ function EmployeeHome() {
             <LayoutGrid className="w-4 h-4" />
             Applications
           </h2>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3">
             {appCategories.map(({ label, Icon, to }) => (
               <Link
                 key={label}

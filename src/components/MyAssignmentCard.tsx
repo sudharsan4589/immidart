@@ -22,7 +22,7 @@ const OVERDUE_REQUESTS = [
   },
 ];
 
-export function MyAssignmentCard() {
+export function MyAssignmentCard({ statusLabel }: { statusLabel?: string } = {}) {
   const [expanded, setExpanded] = useState(false);
   const primary = OVERDUE_REQUESTS[0];
   const extras = OVERDUE_REQUESTS.slice(1);
@@ -61,7 +61,7 @@ export function MyAssignmentCard() {
         {/* Status + action + chevron */}
         <div className="shrink-0 flex items-center gap-3">
           <span className="border border-brand-red text-brand-red text-xs font-semibold px-3 py-1.5 rounded-lg whitespace-nowrap">
-            {primary.status}
+            {statusLabel ?? primary.status}
           </span>
           <button
             type="button"
@@ -136,7 +136,7 @@ export function MyAssignmentCard() {
 
             <div className="shrink-0 flex items-center gap-3">
               <span className="border border-brand-red text-brand-red text-xs font-semibold px-3 py-1.5 rounded-lg whitespace-nowrap">
-                {req.status}
+                {statusLabel ?? req.status}
               </span>
               <button
                 type="button"

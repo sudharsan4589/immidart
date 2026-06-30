@@ -13,6 +13,10 @@ import {
   LifeBuoy,
   BookOpen,
   Sparkles,
+  FilePlus2,
+  FileCheck2,
+  PlaneTakeoff,
+  Briefcase,
 } from "lucide-react";
 
 export const Route = createFileRoute("/employee-lite")({
@@ -37,7 +41,7 @@ function EmployeeLite() {
 
   return (
     <div className="min-h-screen bg-brand-canvas">
-      <PageHeader name="Clark Kent" role="Employee" />
+      <PageHeader name="Clark Kent" role="Employee" hideCreateRequest />
 
       <div className="relative flex-1 min-h-[calc(100vh-73px)]">
         <div
@@ -56,6 +60,27 @@ function EmployeeLite() {
             Verify your profile for up to date information before proceeding.
           </p>
 
+          {/* Assignment process flow */}
+          <div className="w-full">
+            <div className="flex items-start justify-between relative">
+              {/* connector line */}
+              <div className="absolute top-5 left-[calc(12.5%+12px)] right-[calc(12.5%+12px)] h-0.5 bg-brand-blue/20 z-0" />
+              {[
+                { step: 1, Icon: FilePlus2,    label: "Create Assignment",                          sub: "HR initiates the request" },
+                { step: 2, Icon: FileCheck2,   label: "Mobility creates visa request & processes",  sub: "Visa & work permit filing" },
+                { step: 3, Icon: PlaneTakeoff, label: "Travel formalities managed",                 sub: "Flights, accommodation & more" },
+                { step: 4, Icon: Briefcase,    label: "On Assignment",                              sub: "Employee begins work abroad" },
+              ].map(({ step, Icon, label, sub }) => (
+                <div key={step} className="relative z-10 flex flex-col items-center gap-2 w-1/4 px-2">
+                  <div className="w-10 h-10 rounded-full bg-brand-blue/10 border-2 border-brand-blue/30 flex items-center justify-center shrink-0">
+                    <Icon className="w-4 h-4 text-brand-blue" />
+                  </div>
+                  <span className="text-[11px] font-bold text-brand-navy text-center leading-snug">{label}</span>
+                  <span className="text-[10px] text-muted-foreground text-center leading-tight">{sub}</span>
+                </div>
+              ))}
+            </div>
+          </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 w-full max-w-2xl">
             {[

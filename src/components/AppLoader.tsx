@@ -199,13 +199,6 @@ export function AppLoader({ message }: { message?: string }) {
         </div>
       </div>
 
-      {/* Loading message */}
-      <p
-        className="mt-6 text-sm text-muted-foreground tracking-wide"
-        style={{ animation: "immidart-pulse 2.4s ease-in-out infinite" }}
-      >
-        {message ?? "Loading…"}
-      </p>
     </div>
   );
 }
